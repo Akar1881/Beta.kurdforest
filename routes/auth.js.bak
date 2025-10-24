@@ -51,61 +51,21 @@ router.post('/register', redirectIfLoggedIn, async (req, res) => {
     });
 
     const mailOptions = {
-  from: process.env.EMAIL_USER,
-  to: email,
-  subject: '🌟 Thanks for Choosing KurdForest.xyz',
-  html: `
-  <div style="
-    font-family: 'Arial', sans-serif;
-    background: #0b0b0b;
-    color: #e0ffe0;
-    text-align: center;
-    padding: 40px 20px;
-    border-radius: 12px;
-    box-shadow: 0 0 30px rgba(0, 255, 80, 0.3);
-    max-width: 600px;
-    margin: auto;
-  ">
-    <img src="https://kurdforest.xyz/images/banner.svg" alt="KurdForest Banner"
-      style="width: 100%; max-width: 500px; border-radius: 8px; margin-bottom: 25px;">
-
-    <h1 style="color: #00ff7f; margin-bottom: 10px;">Welcome to KurdForest.xyz 🍿</h1>
-    <p style="font-size: 16px; color: #b0ffb0;">
-      Thanks for choosing KurdForest to enjoy your favorite movies and shows.  
-      Registering your email is optional, but if you’d like to unlock extra features, you can verify your email using the code below.
-    </p>
-
-    <div style="
-      background: radial-gradient(circle at top, #00ff7f, #003300);
-      color: #000;
-      font-size: 28px;
-      font-weight: bold;
-      letter-spacing: 4px;
-      border-radius: 10px;
-      padding: 15px 25px;
-      margin: 30px auto;
-      width: fit-content;
-      box-shadow: 0 0 20px rgba(0, 255, 100, 0.6);
-    ">
-      ${verificationCode}
-    </div>
-
-    <p style="font-size: 14px; color: #9fdc9f;">
-      This code is optional and expires in <strong>1 minute</strong>.
-    </p>
-
-    <p style="font-size: 14px; color: #90b490; margin-top: 15px;">
-      If you didn’t register, no worries — you can still enjoy KurdForest!
-    </p>
-
-    <hr style="border: none; height: 1px; background: #1f3d20; margin: 30px 0;">
-
-    <p style="font-size: 13px; color: #6fa76f;">
-      🎥 KurdForest.xyz — Thanks for being part of our movie forest
-    </p>
-  </div>
-  `
-};
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Welcome! Please Verify Your Email',
+        html: `
+          <div style=\"font-family: sans-serif; text-align: center; color: #333;\">
+            <h1 style=\"color: #007bff;\">Welcome to Our Community!</h1>
+            <p>We're excited to have you on board. To complete your registration, please verify your email address using the code below.</p>
+            <p style=\"font-size: 24px; font-weight: bold; color: #28a745;\">${verificationCode}</p>
+            <p>This code will expire in <strong>1 minute</strong>.</p>
+            <p>If you did not create an account, please disregard this email.</p>
+            <hr>
+            <p style=\"font-size: 0.8em; color: #666;\">Thank you for joining us!</p>
+          </div>
+        `
+    };
 
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
