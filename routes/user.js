@@ -45,6 +45,11 @@ const upload = multer({
 
 // --- Profile Routes ---
 
+// GET /profile - Redirect to the logged-in user's profile page
+router.get('/profile', isAuthenticated, (req, res) => {
+    res.redirect(`/profile/${req.session.user.username}`);
+});
+
 // GET /profile/:username - Display a user's profile page
 router.get('/profile/:username', async (req, res) => {
     try {
@@ -88,6 +93,18 @@ router.post('/profile/edit', isAuthenticated, upload.single('profilePicture'), a
 });
 
 // --- Watchlist Routes ---
+// GET /watchlist - Display the user's watchlist
+router.get('/watchlist', isAuthenticated, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.user.id).populate('watchlist');
+        const movies = user.watchlist.filter(item => item.media_type === 'movie');
+        const tvShows = user.watchlist.filter(item => item.media_type === 'tv');
+        res.render('watchlist', { movies, tvShows });
+    } catch (error) {
+        console.error('Watchlist view error:', error);
+        res.status(500).send('Server error');
+    }
+});
 
 // POST /watchlist/add - Add an item to the user's watchlist
 router.post('/watchlist/add', isAuthenticated, async (req, res) => {

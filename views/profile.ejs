@@ -19,6 +19,7 @@
             <div class="profile-info">
                 <h1><%= user.username %></h1>
                 <p><%= user.bio %></p>
+                 <a href="/watchlist" class="btn">View Watchlist</a>
             </div>
         </div>
 
@@ -38,25 +39,6 @@
             </form>
         </div>
         <% } %>
-
-        <div class="watchlist-container">
-            <h2>Watchlist</h2>
-            <div class="watchlist-grid">
-                <% if (user.watchlist && user.watchlist.length > 0) { %>
-                    <% user.watchlist.forEach(item => { %>
-                        <div class="watchlist-item">
-                            <a href="/watch/<%= item.id %>"> 
-                                <img src="<%= item.poster_path %>" alt="<%= item.title %>">
-                                <p><%= item.title %></p>
-                            </a>
-                        </div>
-                    <% }) %>
-                <% } else { %>
-                    <p>No items in watchlist yet.</p>
-                <% } %>
-            </div>
-        </div>
-    </div>
 
     <%- include('partials/footer') %>
 </body>

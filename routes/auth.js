@@ -110,7 +110,13 @@ router.post('/verify', async (req, res) => {
         await user.save();
         removeTempUser(token);
         req.session.user = { id: user._id, username: user.username, profilePicture: user.profilePicture };
-        res.redirect('/');
+        req.session.save(err => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).render('verify', { error: 'An error occurred during verification.', token });
+            }
+            res.redirect('/');
+        });
     } catch (error) {
         console.error('Verification error:', error);
         res.status(500).render('verify', { error: 'An error occurred during verification.', token });
@@ -134,7 +140,13 @@ router.post('/login', redirectIfLoggedIn, async (req, res) => {
         }
       // Store user information in the session
       req.session.user = { id: user._id, username: user.username, profilePicture: user.profilePicture };
-      res.redirect('/');
+      req.session.save(err => {
+        if (err) {
+            console.error('Session save error:', err);
+            return res.status(500).render('login', { error: 'An error occurred during login.' });
+        }
+        res.redirect('/');
+      });
     } else {
       // Render login page again with an error message
       res.status(401).render('login', { error: 'Invalid email or password.' });

@@ -54,6 +54,8 @@
             <% }) %>
           </div>
         <% } %>
+        
+        <button class="add-watchlist-btn" data-tmdb-id="<%= id %>" data-media-type="<%= type %>">Add to Watchlist</button>
 
         <p class="info-overview"><%= details.overview || 'No overview available.' %></p>
       </div>
@@ -157,6 +159,59 @@
   </main>
 
   <%- include('partials/footer') %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const watchlistBtn = document.querySelector('.add-watchlist-btn');
+      const tmdbId = watchlistBtn.dataset.tmdbId;
+      const mediaType = watchlistBtn.dataset.mediaType;
+
+      // Check initial watchlist status
+      try {
+        const checkResponse = await fetch(`/api/watchlist/check/${tmdbId}`);
+        if (checkResponse.ok) {
+          const { inWatchlist } = await checkResponse.json();
+          watchlistBtn.textContent = inWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist';
+        } else {
+           watchlistBtn.textContent = 'Add to Watchlist'; // Default state
+        }
+      } catch (error) {
+        console.error('Error checking watchlist:', error);
+        watchlistBtn.textContent = 'Add to Watchlist'; // Default on error
+      }
+
+      // Click event listener
+      watchlistBtn.addEventListener('click', async () => {
+        const currentAction = watchlistBtn.textContent.includes('Add') ? 'add' : 'remove';
+        const endpoint = `/api/watchlist/${currentAction}`;
+
+        try {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tmdbId, media_type: mediaType })
+          });
+
+          if (response.ok) {
+            watchlistBtn.textContent = currentAction === 'add' ? 'Remove from Watchlist' : 'Add to Watchlist';
+            // Optional: Show a temporary success message
+            const originalText = watchlistBtn.textContent;
+            watchlistBtn.textContent = currentAction === 'add' ? 'Added!' : 'Removed!';
+            setTimeout(() => { 
+                watchlistBtn.textContent = originalText; 
+            }, 2000);
+
+          } else {
+            const result = await response.json();
+            alert(result.message || 'An error occurred.');
+          }
+        } catch (error) {
+          console.error(`Error with watchlist:`, error);
+          alert('An error occurred. Please try again.');
+        }
+      });
+    });
+  </script>
 
   <% if (type === 'tv' || type === 'anime') { %>
     <script>
