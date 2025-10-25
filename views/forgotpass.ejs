@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Forgot Password</title>
     <link rel="stylesheet" href="/css/auth.css">
     <link rel="stylesheet" href="/css/global.css">
 </head>
 <body>
     <%- include('partials/header') %>
     <div class="auth-container">
-        <h1>Login</h1>
+        <h1>Forgot Password</h1>
         <% if (typeof error !== 'undefined') { %>
             <div class="error-message">
                 <p><%= error %></p>
@@ -21,14 +21,12 @@
                 <p><%= message %></p>
             </div>
         <% } %>
-        <form class="auth-form" action="/login" method="POST">
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit">Login</button>
+        <form class="auth-form" action="/forgot-password" method="POST">
+            <input type="email" name="email" placeholder="Enter your email" required>
+            <button type="submit">Send Recovery Link</button>
         </form>
         <div class="auth-link">
-            <p>New to this site? <a href="/register">Register now</a>.</p>
-            <p><a href="/forgot-password">Forgot your password?</a></p>
+            <p>Remember your password? <a href="/login">Login here</a>.</p>
         </div>
     </div>
     <%- include('partials/footer') %>

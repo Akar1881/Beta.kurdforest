@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,6 +11,7 @@
     <%- include('partials/header') %>
 
     <div class="profile-container">
+        <!-- Profile Header -->
         <div class="profile-header">
             <div class="profile-picture">
                 <img src="<%= user.profilePicture %>" alt="Profile Picture">
@@ -19,11 +19,16 @@
             <div class="profile-info">
                 <h1><%= user.username %></h1>
                 <p><%= user.bio %></p>
-                 <a href="/watchlist" class="btn">View Watchlist</a>
+                <% if (isOwnProfile) { %>
+                    <a href="/watchlist/<%= user.username %>" class="btn">View Your Watchlist</a>
+                <% } else { %>
+                    <a href="/watchlist/<%= user.username %>" class="btn">View <%= user.username %>'s Watchlist</a>
+                <% } %>
             </div>
         </div>
 
-        <% if (locals.user && user.id.toString() === locals.user.id.toString()) { %>
+        <!-- Profile Edit (only for owner) -->
+        <% if (isOwnProfile) { %>
         <div class="profile-edit">
             <h2>Edit Profile</h2>
             <form class="profile-edit-form" action="/profile/edit" method="POST" enctype="multipart/form-data">
@@ -38,7 +43,12 @@
                 <button type="submit">Save Changes</button>
             </form>
         </div>
+
+        <div class="logout-section">
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
         <% } %>
+    </div>
 
     <%- include('partials/footer') %>
 </body>

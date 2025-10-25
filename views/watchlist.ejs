@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Watchlist</title>
+    <title><%= owner %>'s Watchlist</title>
     <link rel="stylesheet" href="/css/profile.css">
     <link rel="stylesheet" href="/css/global.css"> 
 </head>
@@ -11,7 +11,7 @@
     <%- include('partials/header') %>
 
     <main class="container">
-        <h1>My Watchlist</h1>
+        <h1><%= owner %>'s Watchlist</h1>
 
         <div class="watchlist-section">
             <h2>Movies</h2>
@@ -27,7 +27,7 @@
                     <% }) %>
                 </div>
             <% } else { %>
-                <p>You haven't added any movies to your watchlist yet.</p>
+                <p><%= owner %> hasn't added any movies to their watchlist yet.</p>
             <% } %>
         </div>
 
@@ -45,7 +45,25 @@
                     <% }) %>
                 </div>
             <% } else { %>
-                <p>You haven't added any TV shows to your watchlist yet.</p>
+                <p><%= owner %> hasn't added any TV shows to their watchlist yet.</p>
+            <% } %>
+        </div>
+
+        <div class="watchlist-section">
+            <h2>Anime</h2>
+            <% if (animes.length > 0) { %>
+                <div class="watchlist-grid">
+                    <% animes.forEach(anime => { %>
+                        <a href="/watch/<%= anime.media_type %>/<%= anime.tmdbId %>" class="card-link">
+                            <div class="card">
+                                <img src="https://image.tmdb.org/t/p/w500<%= anime.poster_path %>" alt="<%= anime.title %> Poster">
+                                <div class="card-title"><%= anime.title %></div>
+                            </div>
+                        </a>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <p><%= owner %> hasn't added any anime to their watchlist yet.</p>
             <% } %>
         </div>
     </main>

@@ -55,9 +55,21 @@ router.get('/profile/:username', async (req, res) => {
     try {
         const user = await User.findOne({ username: req.params.username }).populate('watchlist');
         if (!user) {
-            return res.status(404).render('404'); // Or a dedicated 'user not found' page
+            return res.status(404).render('404');
         }
-        res.render('profile', { user: user });
+
+        const isOwnProfile = req.session.user && req.session.user.id === user._id.toString();
+
+        // Separate watchlist by type
+        const movies = user.watchlist.filter(item => item.media_type === 'movie');
+        const tvShows = user.watchlist.filter(item => item.media_type === 'tv');
+        const animes = user.watchlist.filter(item => item.media_type === 'anime');
+
+        res.render('profile', { 
+            user, 
+            isOwnProfile, 
+            watchlist: { movies, tvShows, animes } 
+        });
     } catch (error) {
         console.error('Profile view error:', error);
         res.status(500).send('Server error');
@@ -65,26 +77,40 @@ router.get('/profile/:username', async (req, res) => {
 });
 
 // POST /profile/edit - Handle profile update form submission
+// POST /profile/edit - Handle profile update form submission
 router.post('/profile/edit', isAuthenticated, upload.single('profilePicture'), async (req, res) => {
     try {
         const { bio } = req.body;
         const user = await User.findById(req.session.user.id);
 
         user.bio = bio;
+
         if (req.file) {
+            const uploadDir = path.join(__dirname, '../public/uploads/profile_pictures');
+            const ext = path.extname(req.file.originalname).toLowerCase();
+            const newFilename = `${user.username}${ext}`;
+            const newFilePath = path.join(uploadDir, newFilename);
+
             // Delete old picture if it's not the default one
             if (user.profilePicture && user.profilePicture !== '/images/banner.png') {
-                fs.unlink(path.join(__dirname, '../public', user.profilePicture), (err) => {
-                    if (err) console.error("Error deleting old profile picture:", err);
-                });
+                const oldFilePath = path.join(__dirname, '../public', user.profilePicture);
+                if (fs.existsSync(oldFilePath)) {
+                    fs.unlinkSync(oldFilePath);
+                }
             }
-            user.profilePicture = `/uploads/profile_pictures/${req.file.filename}`;
+
+            // Rename uploaded file to match username
+            fs.renameSync(req.file.path, newFilePath);
+
+            // Save new path to DB
+            user.profilePicture = `/uploads/profile_pictures/${newFilename}`;
         }
+
         await user.save();
 
-        // Update the user info in the session
+        // Update the session info
         req.session.user.profilePicture = user.profilePicture;
-        
+
         res.redirect(`/profile/${user.username}`);
     } catch (error) {
         console.error('Profile edit error:', error);
@@ -94,16 +120,21 @@ router.post('/profile/edit', isAuthenticated, upload.single('profilePicture'), a
 
 // --- Watchlist Routes ---
 // GET /watchlist - Display the user's watchlist
-router.get('/watchlist', isAuthenticated, async (req, res) => {
-    try {
-        const user = await User.findById(req.session.user.id).populate('watchlist');
-        const movies = user.watchlist.filter(item => item.media_type === 'movie');
-        const tvShows = user.watchlist.filter(item => item.media_type === 'tv');
-        res.render('watchlist', { movies, tvShows });
-    } catch (error) {
-        console.error('Watchlist view error:', error);
-        res.status(500).send('Server error');
-    }
+router.get('/watchlist', async (req, res) => {
+  if (!req.session.user)
+    return res.redirect('/login');
+
+  try {
+    const user = await User.findById(req.session.user.id).populate('watchlist');
+    const movies = user.watchlist.filter(item => item.media_type === 'movie');
+    const tvShows = user.watchlist.filter(item => item.media_type === 'tv');
+    const animes = user.watchlist.filter(item => item.media_type === 'anime');
+
+    res.render('watchlist', { movies, tvShows, animes });
+  } catch (error) {
+    console.error('Error loading watchlist:', error);
+    res.status(500).send('Server error');
+  }
 });
 
 // POST /watchlist/add - Add an item to the user's watchlist
@@ -130,6 +161,29 @@ router.post('/watchlist/remove', isAuthenticated, async (req, res) => {
         res.redirect('back');
     } catch (error) {
         console.error('Watchlist remove error:', error);
+        res.status(500).send('Server error');
+    }
+});
+
+// GET /watchlist/:username - Show public watchlist of a user
+router.get('/watchlist/:username', async (req, res) => {
+    try {
+        const user = await User.findOne({ username: req.params.username }).populate('watchlist');
+        if (!user) return res.status(404).render('404');
+
+        // Separate by type
+        const movies = user.watchlist.filter(item => item.media_type === 'movie');
+        const tvShows = user.watchlist.filter(item => item.media_type === 'tv');
+        const animes = user.watchlist.filter(item => item.media_type === 'anime');
+
+        res.render('watchlist', { 
+            movies, 
+            tvShows, 
+            animes,
+            owner: user.username // optional for display
+        });
+    } catch (error) {
+        console.error('Error loading public watchlist:', error);
         res.status(500).send('Server error');
     }
 });
